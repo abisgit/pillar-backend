@@ -1,0 +1,148 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String?
+  image     String?
+  bio       String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  goals       Goal[]
+  reflections Reflection[]
+  posts       Post[]
+  comments    Comment[]
+  likes       Like[]
+  
+  communities Member[]
+  events      EventAttendee[]
+}
+
+model Goal {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  title       String
+  description String?
+  category    String // Pillars: Health & Fitness, Mental Health, Career, Finances, Relationships, Personal Growth, Productivity, Spirituality, Lifestyle
+  difficulty  String // Easy, Medium, Hard
+  horizon     String // Daily, Weekly, Monthly, Annual
+  isCompleted Boolean  @default(false)
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Reflection {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  content   String
+  mood      String? 
+  createdAt DateTime @default(now())
+}
+
+model Post {
+  id          String   @id @default(uuid())
+  content     String
+  images      PostImage[]
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id])
+  communityId String?
+  community   Community? @relation(fields: [communityId], references: [id])
+  
+  comments    Comment[]
+  likes       Like[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model PostImage {
+  id     String @id @default(uuid())
+  url    String
+  postId String
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  content   String
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id])
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model Like {
+  id        String   @id @default(uuid())
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([postId, userId])
+}
+
+model Community {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  city        String?
+  image       String?
+  
+  members     Member[]
+  posts       Post[]
+  events      Event[]
+  
+  createdAt   DateTime @default(now())
+}
+
+model Member {
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  communityId String
+  community   Community @relation(fields: [communityId], references: [id])
+  role        String    @default("MEMBER") // ADMIN, MEMBER
+  joinedAt    DateTime  @default(now())
+
+  @@unique([userId, communityId])
+}
+
+model Event {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  date        DateTime
+  location    String?
+  
+  communityId String?
+  community   Community? @relation(fields: [communityId], references: [id])
+  
+  attendees   EventAttendee[]
+  
+  createdAt   DateTime @default(now())
+}
+
+model EventAttendee {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id])
+  status    String   @default("GOING") // GOING, INTERESTED
+  
+  @@unique([userId, eventId])
+}
