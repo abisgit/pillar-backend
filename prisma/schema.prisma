@@ -25,6 +25,19 @@ model User {
   
   communities Member[]
   events      EventAttendee[]
+  
+  followers   Follows[] @relation("following")
+  following   Follows[] @relation("follower")
+  eventMessages EventMessage[]
+}
+
+model Follows {
+  follower    User   @relation("follower", fields: [followerId], references: [id])
+  followerId  String
+  following   User   @relation("following", fields: [followingId], references: [id])
+  followingId String
+
+  @@id([followerId, followingId])
 }
 
 model Goal {
@@ -34,12 +47,20 @@ model Goal {
   title       String
   description String?
   category    String // Pillars: Health & Fitness, Mental Health, Career, Finances, Relationships, Personal Growth, Productivity, Spirituality, Lifestyle
-  difficulty  String // Easy, Medium, Hard
+  difficulty  String? // Easy, Medium, Hard
   horizon     String // Daily, Weekly, Monthly, Annual
   isCompleted Boolean  @default(false)
   completedAt DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model GoalTemplate {
+  id          String   @id @default(uuid())
+  title       String
+  category    String
+  horizon     String   // Daily, Weekly, Occasional
+  createdAt   DateTime @default(now())
 }
 
 model Reflection {
@@ -101,6 +122,7 @@ model Community {
   description String?
   city        String?
   image       String?
+  creatorId   String?
   
   members     Member[]
   posts       Post[]
@@ -132,6 +154,7 @@ model Event {
   community   Community? @relation(fields: [communityId], references: [id])
   
   attendees   EventAttendee[]
+  messages    EventMessage[]
   
   createdAt   DateTime @default(now())
 }
@@ -145,4 +168,14 @@ model EventAttendee {
   status    String   @default("GOING") // GOING, INTERESTED
   
   @@unique([userId, eventId])
+}
+
+model EventMessage {
+  id        String   @id @default(uuid())
+  content   String
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id])
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+  createdAt DateTime @default(now())
 }
