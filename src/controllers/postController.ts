@@ -45,9 +45,12 @@ export const createPost = async (req: AuthRequest, res: Response) => {
         }
 
         const imageUrls: string[] = [];
+        console.log(`[Create Post] Files received:`, req.files);
         if (req.files && Array.isArray(req.files)) {
             req.files.forEach((file: any) => {
-                imageUrls.push(`/uploads/${file.filename}`);
+                const url = `/uploads/${file.filename}`;
+                imageUrls.push(url);
+                console.log(`[Create Post] Image saved at: ${url}`);
             });
         }
 
@@ -64,6 +67,7 @@ export const createPost = async (req: AuthRequest, res: Response) => {
                 images: true
             }
         });
+        console.log(`[Create Post] Post created with ${imageUrls.length} images.`);
         res.status(201).json(post);
     } catch (error) {
         res.status(500).json({ message: 'Server Error', error });

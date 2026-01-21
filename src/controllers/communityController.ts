@@ -33,7 +33,11 @@ export const getCommunities = async (req: AuthRequest, res: Response) => {
             where: whereClause,
             include: {
                 _count: {
-                    select: { members: true }
+                    select: {
+                        members: true,
+                        posts: true,
+                        events: true
+                    }
                 }
             }
         });

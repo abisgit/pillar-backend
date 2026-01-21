@@ -2,12 +2,20 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { PrismaClient } from '@prisma/client';
+import fs from 'fs';
+import path from 'path';
 
 dotenv.config();
 
 const app = express();
 const prisma = new PrismaClient();
 const PORT = process.env.PORT || 4000;
+
+// Ensure uploads directory exists
+const uploadsDir = path.join(__dirname, '../uploads');
+if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+}
 
 app.use(cors()); // Allow all origins for MVP dev to fix blocking issues
 app.use(express.json());
@@ -21,7 +29,6 @@ import goalRoutes from './routes/goalRoutes';
 import postRoutes from './routes/postRoutes';
 import communityRoutes, { eventRouter } from './routes/communityRoutes';
 import userRoutes from './routes/userRoutes';
-import path from 'path';
 
 // Serve static files from uploads directory
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));

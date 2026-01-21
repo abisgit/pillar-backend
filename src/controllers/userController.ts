@@ -32,6 +32,8 @@ export const updateProfile = async (req: AuthRequest, res: Response) => {
             updateData.image = avatarUrl;
         }
 
+        console.log(`[Update Profile] updateData:`, updateData);
+
         const updatedUser = await prisma.user.update({
             where: { id: req.user.id as string },
             data: updateData,
